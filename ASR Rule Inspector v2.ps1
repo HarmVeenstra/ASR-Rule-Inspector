@@ -1,3 +1,43 @@
+<#
+.SYNOPSIS
+This script inspects and reports on Attack Surface Reduction (ASR) rules and Controlled Folder Access (CFA) configurations for devices managed by Microsoft Intune.
+
+.DESCRIPTION
+The script performs the following tasks:
+1. Checks for administrative privileges.
+2. Installs and imports required PowerShell modules for Microsoft Graph API.
+3. Connects to Microsoft Graph API with appropriate scopes.
+4. Retrieves ASR rules and CFA configurations from Intune policies.
+5. Compares Intune configurations with local device settings.
+6. Identifies duplicates, conflicts, and mismatches in ASR rules and exclusions.
+7. Generates an HTML report summarizing the findings.
+
+.PARAMETER None
+No parameters are required to run this script.
+
+.FUNCTIONS
+- Test-AdminElevation: Verifies if the script is running with administrative privileges.
+- Install-Requirements: Installs and imports required PowerShell modules for Microsoft Graph API.
+- Ensure-MgGraphConnection: Establishes a connection to Microsoft Graph API with the necessary scopes.
+- New-HTMLReport: Generates an HTML report summarizing ASR rules, exclusions, and CFA configurations.
+- Get-IntuneConfiguredASRRules: Retrieves ASR rules configured in Intune policies.
+- Find-DuplicateASRRules: Identifies duplicate or conflicting ASR rules in Intune configurations.
+- Get-ASRStatus: Compares Intune ASR configurations with local device ASR settings.
+- Get-ASRStatusExclusions: Retrieves and compares ASR exclusions from Intune and local device settings.
+- get-CFAStatus: Retrieves and compares Controlled Folder Access (CFA) configurations from Intune and local device settings.
+- Get-IntuneDeviceData: Retrieves detailed device properties from Intune.
+- Test-IntuneFilter: Evaluates Intune assignment filters against device properties.
+- Test-DevicePolicyAssignment: Checks if a specific Intune policy is assigned to a device.
+
+.NOTES
+Author: Roy Klooster
+Date: 2025
+Version: 2.0
+
+.LINK
+For more information, visit https://github.com/royklo/ASR-Rule-Inspector
+#>
+
 function Test-AdminElevation {
     # Check for elevated permissions
     $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
