@@ -41,7 +41,7 @@ The **ASR Rule Inspector** is a PowerShell script designed to inspect and report
      ```powershell
      .\ASR-Rule-Inspector.ps1
      ```
-    <img src="assets/report.gif" alt="ASR Rule Inspector Report" width="50%">
+    <img src="assets/report.gif" alt="ASR Rule Inspector Report" width="80%">
 
 ## Parameters
 
