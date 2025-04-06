@@ -361,7 +361,7 @@ Function Get-IntuneConfiguredASRRules {
 
 				# Check if any setting matches the desired definition IDs
 				$matchingSettings = $policyWithSettings.settings.values | 
-				Where-Object { $SettingDefinitionIDs -contains $_.settingDefinitionId }
+				Where-Object $SettingDefinitionIDs -Contains $_.settingDefinitionId
 
 				if ($matchingSettings) {
 					$script:AllPolicies += $policyWithSettings
