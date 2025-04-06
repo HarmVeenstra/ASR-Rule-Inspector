@@ -360,8 +360,7 @@ Function Get-IntuneConfiguredASRRules {
 				$policyWithSettings = Invoke-MgGraphRequest -Method GET -Uri $settingsUri -ErrorAction Stop
 
 				# Check if any setting matches the desired definition IDs
-				$matchingSettings = $policyWithSettings.settings.values | 
-				Where-Object $SettingDefinitionIDs -Contains $_.settingDefinitionId
+				$matchingSettings = $policyWithSettings.settings.values | Where-Object { $SettingDefinitionIDs -Contains $_.settingDefinitionId }
 
 				if ($matchingSettings) {
 					$script:AllPolicies += $policyWithSettings
