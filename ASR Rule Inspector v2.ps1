@@ -309,17 +309,15 @@ function Ensure-MgGraphConnection {
 
 	Connect-MgGraph -Scopes $AuthenticationScope -NoWelcome
 
-	$Contextinfo = (Get-MgContext)
-        
-	if ($Contextinfo) {
-		# Disconnect any active sessions
-		Disconnect-MgGraph | Out-Null
-		Write-Host "Disconnected from Microsoft Graph." -ForegroundColor Green
-
-		# Reconnect to Microsoft Graph
+	# Check if already connected
+	$Contextinfo = Get-MgContext -ErrorAction SilentlyContinue
+	if (-not $Contextinfo) {
+		# If not connected, connect now
 		Connect-MgGraph -Scopes $AuthenticationScope -NoWelcome
 	}
-
+ else {
+		Write-Host "Already connected to Microsoft Graph as $($Contextinfo.Account)." -ForegroundColor Green
+	}
         
 	Start-Sleep -Seconds 2
 	Clear-Host
