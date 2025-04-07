@@ -18,7 +18,7 @@ No parameters are required to run this script.
 .FUNCTIONS
 - Test-AdminElevation: Verifies if the script is running with administrative privileges.
 - Install-Requirements: Installs and imports required PowerShell modules for Microsoft Graph API.
-- Ensure-MgGraphConnection: Establishes a connection to Microsoft Graph API with the necessary scopes.
+- Test-MgGraphConnection: Establishes a connection to Microsoft Graph API with the necessary scopes.
 - New-HTMLReport: Generates an HTML report summarizing ASR rules, exclusions, and CFA configurations.
 - Get-IntuneConfiguredASRRules: Retrieves ASR rules configured in Intune policies.
 - Find-DuplicateASRRules: Identifies duplicate or conflicting ASR rules in Intune configurations.
@@ -282,19 +282,24 @@ Function Install-Requirements {
 
 	# Import the required modules
 	foreach ($module in $requiredModules) {
-		try {
-			Import-Module -Name $module -Force -ErrorAction Stop
-			Write-Host "Module $module imported successfully." -ForegroundColor Green
+		$ImportedModules = Get-Module -Name Microsoft.Graph*
+		if (-not ($ImportedModules | Where-Object Name -EQ $module)) {
+			try {
+				Import-Module -Name $module -Force -ErrorAction Stop
+				Write-Host "Module $module imported successfully." -ForegroundColor Green
+			}
+			catch {
+				Write-Host "Failed to import module $module $_" -ForegroundColor Red
+				throw
+			}
 		}
-		catch {
-			Write-Host "Failed to import module $module $_" -ForegroundColor Red
-			throw
+		else {
+			Write-Host "Module $module was already imported successfully." -ForegroundColor Green
 		}
 	}
-
 }
 
-function Ensure-MgGraphConnection {
+function Test-MgGraphConnection {
 	Clear-Host
 
 	# Authentication 
@@ -572,12 +577,11 @@ Function Find-DuplicateASRRules {
 	# Check for conflicting ASR rules
 	$SameASRRules = $script:IntuneASRConfiguration | Group-Object -Property ASRRuleGUID | Where-Object { $_.Count -gt 1 } 
 
-	$SameRulesReport = @()
-	foreach ($same in $SameASRRules) {
+	$SameRulesReport = foreach ($same in $SameASRRules) {
 		$conflict = ($same.Group.ConfiguredValue.FriendlyNameValue | Sort-Object -Unique).Count -gt 1
 		$result = if ($conflict) { "Conflict" } else { "Duplicate" }
 		$same.Group | ForEach-Object {
-			$SameRulesReport += [PSCustomObject]@{
+			[PSCustomObject]@{
 				Policy          = $_.PolicyName
 				"Policy Type"   = $_.PolicyType
 				Name            = $_.ASRRuleName
@@ -615,8 +619,7 @@ Function Get-ASRStatus {
 		return @()
 	}
 
-	$ASROnDeviceResults = @()
-	foreach ($rule in $script:IntuneConfigurableASRRules) {
+	$ASROnDeviceResults = foreach ($rule in $script:IntuneConfigurableASRRules) {
 		if ($LocalFoundASRRules.ContainsKey($rule.GUID)) {
 			$ruleValue = $LocalFoundASRRules[$rule.GUID]
 			$localStatus = ($script:enabledvalues.values | Where-Object { $_.RegeditValue -eq $ruleValue }).FriendlyNameValue
@@ -628,7 +631,7 @@ Function Get-ASRStatus {
 				foreach ($IntuneMatch in $IntuneMatches) {
 					$intuneConfiguredValue = $IntuneMatch.ConfiguredValue.FriendlyNameValue
 					$matchesIntuneConfig = if ($localStatus -eq $intuneConfiguredValue) { "Match" } else { "No Match" }
-					$ASROnDeviceResults += [PSCustomObject]@{
+					[PSCustomObject]@{
 						Policy          = $IntuneMatch.PolicyName
 						"Policy Type"   = $IntuneMatch.PolicyType
 						Name            = $rule.Name
@@ -640,7 +643,7 @@ Function Get-ASRStatus {
 				}
 			}
 			else {
-				$ASROnDeviceResults += [PSCustomObject]@{
+				[PSCustomObject]@{
 					Policy          = "Not Configured"
 					Name            = $rule.Name
 					"Policy Type"   = "Not Configured"
@@ -653,7 +656,7 @@ Function Get-ASRStatus {
 		}
 		elseif ($IntuneMatches) {
 			foreach ($IntuneMatch in $IntuneMatches) {
-				$ASROnDeviceResults += [PSCustomObject]@{
+				[PSCustomObject]@{
 					Policy          = $IntuneMatch.PolicyName
 					"Policy Type"   = $IntuneMatch.PolicyType
 					Name            = $rule.Name
@@ -965,13 +968,11 @@ function Get-CFAStatus {
 		}
 	}
 
-	$MatchedCFAResults = @()
-
-	foreach ($CFAItem in $IntuneCFAPolicies) {
+	$MatchedCFAResults = foreach ($CFAItem in $IntuneCFAPolicies) {
 		if ($CFAItem.Type -eq "Controlled Folder Access") {
 			$result = if ($CFAItem.Value -eq $CFAStatus) { "Match" } else { "No Match" }
 			$note = if ($result -eq "No Match") { "CFA status does not match Intune configuration" }
-			$MatchedCFAResults += [PSCustomObject]@{
+			[PSCustomObject]@{
 				PolicyName  = $CFAItem.PolicyName
 				PolicyType  = $CFAItem.PolicyType
 				Type        = $CFAItem.Type
@@ -985,7 +986,7 @@ function Get-CFAStatus {
 			$existsLocally = $ProtectedFolders | Where-Object { $_.Value -eq $CFAItem.Value }
 			$result = if ($existsLocally) { "Match" } else { "No Match" }
 			$note = if ($result -eq "No Match") { "Protected folder not found locally" }
-			$MatchedCFAResults += [PSCustomObject]@{
+			[PSCustomObject]@{
 				PolicyName  = $CFAItem.PolicyName
 				PolicyType  = $CFAItem.PolicyType
 				Type        = $CFAItem.Type
@@ -999,7 +1000,7 @@ function Get-CFAStatus {
 			$existsLocally = $ProtectedApplications | Where-Object { $_.Value -eq $CFAItem.Value }
 			$result = if ($existsLocally) { "Match" } else { "No Match" }
 			$note = if ($result -eq "No Match") { "Allowed application not found locally" }
-			$MatchedCFAResults += [PSCustomObject]@{
+			[PSCustomObject]@{
 				PolicyName  = $CFAItem.PolicyName
 				PolicyType  = $CFAItem.PolicyType
 				Type        = $CFAItem.Type
@@ -1086,7 +1087,7 @@ function Test-IntuneFilter {
 	)
 
 	# Helper function to evaluate a single condition
-	function Evaluate-Condition {
+	function Test-Condition {
 		param (
 			[string]$PropertyPath,
 			[string]$Operator,
@@ -1192,7 +1193,7 @@ function Test-IntuneFilter {
 		$allAndConditionsTrue = $true
         
 		foreach ($andCondition in $orCondition.AndConditions) {
-			$result = Evaluate-Condition -PropertyPath $andCondition.PropertyPath -Operator $andCondition.Operator -Value $andCondition.Value
+			$result = Test-Condition -PropertyPath $andCondition.PropertyPath -Operator $andCondition.Operator -Value $andCondition.Value
 			Write-Verbose "Evaluated: $($andCondition.PropertyPath) $($andCondition.Operator) '$($andCondition.Value)' = $result"
             
 			if (-not $result) {
@@ -1305,7 +1306,7 @@ function Test-DevicePolicyAssignment {
 		Write-Host "Retrieving all Intune filters..." -ForegroundColor Cyan
 	}
     
-	$intuneFilters = Get-MgBetaDeviceManagementAssignmentFilter | Where-Object { $_.Platform -eq "windows10AndLater" }
+	$intuneFilters = Get-MgBetaDeviceManagementAssignmentFilter | Where-Object Platform -EQ "windows10AndLater"
     
 	# Get policy assignments
 	if ($ShowVerbose) {
@@ -1354,7 +1355,7 @@ function Test-DevicePolicyAssignment {
         
 		# Handle filter logic if present
 		if ($filterId) {
-			$filter = $intuneFilters | Where-Object { $_.id -eq $filterId }
+			$filter = $intuneFilters | Where-Object id -EQ $filterId
             
 			if ($filter) {
 				if ($ShowVerbose) {
@@ -1413,7 +1414,7 @@ if (-not (Test-AdminElevation)) {
 Install-Requirements
 
 # Connect to Microsoft Graph
-Ensure-MgGraphConnection
+Test-MgGraphConnection
 
 # Get all Configuration Policies (you can filter this as needed)
 $configPolicies = Get-IntuneConfiguredASRRules
