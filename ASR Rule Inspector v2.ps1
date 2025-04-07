@@ -282,16 +282,21 @@ Function Install-Requirements {
 
 	# Import the required modules
 	foreach ($module in $requiredModules) {
-		try {
-			Import-Module -Name $module -Force -ErrorAction Stop
-			Write-Host "Module $module imported successfully." -ForegroundColor Green
+		$ImportedModules = Get-Module -Name Microsoft.Graph*
+		if (-not ($ImportedModules | Where-Object Name -EQ $module)) {
+			try {
+				Import-Module -Name $module -Force -ErrorAction Stop
+				Write-Host "Module $module imported successfully." -ForegroundColor Green
+			}
+			catch {
+				Write-Host "Failed to import module $module $_" -ForegroundColor Red
+				throw
+			}
 		}
-		catch {
-			Write-Host "Failed to import module $module $_" -ForegroundColor Red
-			throw
+		else {
+			Write-Host "Module $module was already imported successfully." -ForegroundColor Green
 		}
 	}
-
 }
 
 function Test-MgGraphConnection {
