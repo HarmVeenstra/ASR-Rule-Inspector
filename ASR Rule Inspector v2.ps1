@@ -340,6 +340,29 @@ Function Get-IntuneConfiguredASRRules {
 		"device_vendor_msft_policy_config_defender_attacksurfacereductionrules"
 	)
 
+	# $ASRRulesMapping = @{
+    #     "blockadobereaderfromcreatingchildprocesses" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockadobereaderfromcreatingchildprocesses_perruleexclusions"
+    #     "blockexecutionofpotentiallyobfuscatedscripts" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockexecutionofpotentiallyobfuscatedscripts_perruleexclusions"
+    #     "blockwin32apicallsfromofficemacros" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockwin32apicallsfromofficemacros_perruleexclusions"
+    #     "blockcredentialstealingfromwindowslocalsecurityauthoritysubsystem" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockcredentialstealingfromwindowslocalsecurityauthoritysubsystem_perruleexclusions"
+    #     "blockexecutablefilesrunningunlesstheymeetprevalenceagetrustedlistcriterion" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockexecutablefilesrunningunlesstheymeetprevalenceagetrustedlistcriterion_perruleexclusions"
+    #     "blockjavascriptorvbscriptfromlaunchingdownloadedexecutablecontent" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockjavascriptorvbscriptfromlaunchingdownloadedexecutablecontent_perruleexclusions"
+    #     "blockofficecommunicationappfromcreatingchildprocesses" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockofficecommunicationappfromcreatingchildprocesses_perruleexclusions"
+    #     "blockallofficeapplicationsfromcreatingchildprocesses" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockallofficeapplicationsfromcreatingchildprocesses_perruleexclusions"
+    #     "blockuntrustedunsignedprocessesthatrunfromusb" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockuntrustedunsignedprocessesthatrunfromusb_perruleexclusions"
+    #     "blockprocesscreationsfrompsexecandwmicommands" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockprocesscreationsfrompsexecandwmicommands_perruleexclusions"
+    #     "blockpersistencethroughwmieventsubscription" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockpersistencethroughwmieventsubscription_perruleexclusions"
+    #     "blockofficeapplicationsfromcreatingexecutablecontent" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockofficeapplicationsfromcreatingexecutablecontent_perruleexclusions"
+    #     "blockofficeapplicationsfrominjectingcodeintootherprocesses" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockofficeapplicationsfrominjectingcodeintootherprocesses_perruleexclusions"
+    #     "useadvancedprotectionagainstransomware" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_useadvancedprotectionagainstransomware_perruleexclusions"
+    #     "blockexecutablecontentfromemailclientandwebmail" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockexecutablecontentfromemailclientandwebmail_perruleexclusions"
+    #     "blockabuseofexploitedvulnerablesigneddrivers" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockabuseofexploitedvulnerablesigneddrivers_perruleexclusions"
+    #     "blockrebootingmachineinsafemode" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockrebootingmachineinsafemode_perruleexclusions"
+    #     "blockuseofcopiedorimpersonatedsystemtools" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockuseofcopiedorimpersonatedsystemtools_perruleexclusions"
+    #     "blockwebshellcreationforservers" = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockwebshellcreationforservers_perruleexclusions"
+    # }
+	# $script:AllPolicies.settings.settinginstance.groupSettingCollectionValue.children.choicesettingvalue.children.settingDefinitionId
+
 	# Initialize an empty array to store filtered policies
 	$script:AllPolicies = @()
 
@@ -365,7 +388,7 @@ Function Get-IntuneConfiguredASRRules {
 				$policyWithSettings = Invoke-MgGraphRequest -Method GET -Uri $settingsUri -ErrorAction Stop
 
 				# Check if any setting matches the desired definition IDs
-				$matchingSettings = $policyWithSettings.settings.values | Where-Object { $SettingDefinitionIDs -Contains $_.settingDefinitionId }
+				#$matchingSettings = $policyWithSettings.settings.values | Where-Object { $SettingDefinitionIDs -Contains $_.settingDefinitionId }
 
 				if ($matchingSettings) {
 					$script:AllPolicies += $policyWithSettings
