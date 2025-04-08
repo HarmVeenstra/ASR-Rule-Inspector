@@ -503,12 +503,12 @@ Function Get-IntuneConfiguredASRRules {
             IntuneASRSettingName = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockabuseofexploitedvulnerablesigneddrivers" 
         },
         [PSCustomObject]@{ 
-            Name                 = "Block rebooting machine in Safe Mode (preview)" 
+            Name                 = "Block rebooting machine in Safe Mode" 
             GUID                 = "33ddedf1-c6e0-47cb-833e-de6133960387" 
             IntuneASRSettingName = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockrebootingmachineinsafemode" 
         },
         [PSCustomObject]@{ 
-            Name                 = "Block use of copied or impersonated system tools (preview)" 
+            Name                 = "Block use of copied or impersonated system tools" 
             GUID                 = "c0033c00-d16d-4114-a5a0-dc9b3a7d2ceb" 
             IntuneASRSettingName = "device_vendor_msft_policy_config_defender_attacksurfacereductionrules_blockuseofcopiedorimpersonatedsystemtools" 
         },
