@@ -1670,7 +1670,7 @@ foreach ($policy in $script:AllPolicies) {
     $policyName = $policy.name
     Write-Host "Checking policy: $policyName" -ForegroundColor Magenta
     # Check if the device is assigned this policy
-    $isAssigned = Test-DevicePolicyAssignment -PolicyId $policyId -DeviceName $deviceName -ShowVerbose:$true
+    $isAssigned = Test-DevicePolicyAssignment -PolicyId $policyId -DeviceName $deviceName -ShowVerbose:$false
     if ($isAssigned) {
         Write-Host "[OK] Policy '$policyName' is assigned to device $deviceName" -ForegroundColor Green
         $applicablePolicies += $policy
