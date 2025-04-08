@@ -594,7 +594,8 @@ Function Get-IntuneConfiguredASRRules {
             continue
         }
     }
-    return $script:IntuneASRConfiguration | Sort-Object -Property PolicyName
+    #return $script:IntuneASRConfiguration | Sort-Object -Property PolicyName
+    return $script:AllPolicies
 
 }
 
@@ -1665,7 +1666,7 @@ $deviceProperties = Get-IntuneDeviceData -DeviceName $deviceName
 # Check which policies apply to this device
 $applicablePolicies = @()
 Write-Host "Checking policies for device: $deviceName" -ForegroundColor Cyan
-foreach ($policy in $script:AllPolicies) {
+foreach ($policy in $configPolicies) {
     $policyId = $policy.id
     $policyName = $policy.name
     Write-Host "Checking policy: $policyName" -ForegroundColor Magenta
