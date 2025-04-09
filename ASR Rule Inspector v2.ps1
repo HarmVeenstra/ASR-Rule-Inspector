@@ -289,23 +289,24 @@ function New-HTMLReport {
 "@
 
     # Save the HTML report
-    $documentsPath = [Environment]::GetFolderPath("MyDocuments")
-    $reportPath = Join-Path -Path $documentsPath -ChildPath "ASRRuleInspectionReport.html"
-    $html | Out-File -FilePath $reportPath -Encoding UTF8
-    Write-Host "Report generated: $reportPath" -ForegroundColor Green
+    $documentsPath = [Environment]::GetFolderPath("CommonDocuments")
+    $script:reportPath = Join-Path -Path $documentsPath -ChildPath "ASRRuleInspectionReport.html"
+    $html | Out-File -FilePath $script:reportPath -Encoding UTF8
+    Write-Host "Report generated: $script:reportPath" -ForegroundColor Green
 
     # Open the HTML report automatically
-    Start-Process -FilePath $reportPath
+    Start-Process -FilePath $script:reportPath
+
 }
 
 Function Install-Requirements {
     # Check if the required modules are installed
     $modules = Get-Module -ListAvailable -Name Microsoft.Graph*
-    $requiredModules = @("Microsoft.Graph.DeviceManagement", "Microsoft.Graph.Authentication", "Microsoft.Graph.Identity.DirectoryManagement", "Microsoft.Graph.Users", "Microsoft.Graph.Beta.DeviceManagement")
+    $requiredModules = @("Microsoft.Graph.Authentication","Microsoft.Graph.DeviceManagement", "Microsoft.Graph.Identity.DirectoryManagement", "Microsoft.Graph.Users", "Microsoft.Graph.Beta.DeviceManagement") | Sort-Object -Descending
     foreach ($module in $requiredModules) {
         if (-not ($modules | Where-Object Name -EQ $module)) {
             Write-Host "Installing module: $module" -ForegroundColor Cyan
-            Install-Module -Name $module -Scope CurrentUser -Force -AllowClobber
+            Install-Module -Name $module -Scope CurrentUser -Force -AllowClobber -RequiredVersion 2.25.0
         }
     }
 
@@ -314,7 +315,7 @@ Function Install-Requirements {
         $ImportedModules = Get-Module -Name Microsoft.Graph*
         if (-not ($ImportedModules | Where-Object Name -EQ $module)) {
             try {
-                Import-Module -Name $module -Force -ErrorAction Stop
+                Import-Module -Name $module -Force -RequiredVersion 2.25.0 -ErrorAction Stop
                 Write-Host "Module $module imported successfully." -ForegroundColor Green
             }
             catch {
@@ -1739,3 +1740,8 @@ New-HTMLReport -ASRRules $filteredASRData -DuplicateASRRules $DuplicateASRRules 
 
 # Disconnect from Microsoft Graph
 Disconnect-MgGraph | Out-Null
+
+# Clean up HTRML
+Write-Host "Cleaning up HTML report in 10 seconds after opening..." -ForegroundColor Cyan
+start-sleep -Seconds 10
+Remove-Item -Path $script:reportPath -Force
